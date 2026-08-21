@@ -21,11 +21,98 @@
       min-height: 100vh;
       position: relative;
       overflow-x: hidden;
-      cursor: auto;
+      cursor: none; /* Hide default browser cursor */
     }
 
     button, input, select, textarea, a {
-      cursor: pointer;
+      cursor: none; /* Custom wand stays active over all controls */
+    }
+
+    /* Minimalist Magic Wand Container */
+    #wand-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 10000;
+      transform: translate(0, 0);
+      transition: transform 0.04s linear;
+    }
+
+    /* Sleek, Minimalistic Wand Needle */
+    .wand {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 2.5px;
+      height: 30px;
+      background: linear-gradient(to bottom, #f4e4bc 0%, #a3753b 40%, #2b1808 100%);
+      border-radius: 1px 1px 2px 2px;
+      transform: rotate(-35deg);
+      transform-origin: top center;
+      filter: drop-shadow(1px 2px 4px rgba(0,0,0,0.8));
+      transition: transform 0.12s ease;
+    }
+
+    /* Subtle Tip Glow Dot */
+    .wand-tip-glow {
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      width: 5px;
+      height: 5px;
+      background: #ffffff;
+      border-radius: 50%;
+      box-shadow: 0 0 6px #ffd700, 0 0 12px #d3a625;
+    }
+
+    /* Subtle Ring Trailing behind the Tip */
+    #cursor-follower {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 18px;
+      height: 18px;
+      border: 1px solid rgba(211, 166, 37, 0.5);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: transform 0.15s ease-out, width 0.2s ease, height 0.2s ease, opacity 0.2s ease;
+      box-shadow: 0 0 6px rgba(211, 166, 37, 0.2);
+    }
+
+    body:active #wand-container .wand {
+      transform: rotate(-20deg) scale(0.92);
+    }
+
+    body:active #cursor-follower {
+      transform: translate(-50%, -50%) scale(0.65);
+      border-color: rgba(211, 166, 37, 0.8);
+    }
+
+    /* Minimal Sparkle Particle */
+    .sparkle {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9998;
+      width: 3.5px;
+      height: 3.5px;
+      background-color: #f4e4bc;
+      border-radius: 50%;
+      box-shadow: 0 0 5px #d3a625, 0 0 8px #ffd700;
+      animation: sparkleFade 0.5s linear forwards;
+    }
+
+    @keyframes sparkleFade {
+      0% {
+        opacity: 0.9;
+        transform: translate(-50%, -50%) scale(1.1);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(var(--dx), var(--dy)) scale(0);
+      }
     }
 
     /* ================= AUTH / LOGIN PAGE ================= */
@@ -485,6 +572,13 @@
 </head>
 <body>
 
+  <!-- Minimalist Wand Cursor Elements -->
+  <div id="wand-container">
+    <div class="wand"></div>
+    <div class="wand-tip-glow"></div>
+  </div>
+  <div id="cursor-follower"></div>
+
   <!-- Auth Screen Wrapper -->
   <div id="auth-box" class="auth-wrapper fade-in">
     <div class="card">
@@ -598,7 +692,57 @@
     let currentUser = "";
     let currentFilter = "all";
 
-    // Helper: Safely fetch parsed JSON from localStorage without throwing errors
+    /* ================= MINIMALIST WAND & SPARKLE ANIMATIONS ================= */
+    const wandContainer = document.getElementById("wand-container");
+    const follower = document.getElementById("cursor-follower");
+    let lastSparkle = 0;
+
+    document.addEventListener("mousemove", (e) => {
+      if (wandContainer) {
+        wandContainer.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+      }
+
+      if (follower) {
+        follower.style.left = `${e.clientX}px`;
+        follower.style.top = `${e.clientY}px`;
+      }
+
+      // Throttled subtle trail from wand tip (~60ms)
+      const now = Date.now();
+      if (now - lastSparkle > 60) {
+        createSparkle(e.clientX, e.clientY, 1);
+        lastSparkle = now;
+      }
+    });
+
+    document.addEventListener("click", (e) => {
+      createSparkle(e.clientX, e.clientY, 4);
+    });
+
+    function createSparkle(x, y, count) {
+      for (let i = 0; i < count; i++) {
+        const sparkle = document.createElement("div");
+        sparkle.className = "sparkle";
+        sparkle.style.left = `${x}px`;
+        sparkle.style.top = `${y}px`;
+
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 10 + Math.random() * 16;
+        const dx = Math.cos(angle) * distance;
+        const dy = Math.sin(angle) * distance;
+
+        sparkle.style.setProperty("--dx", `${dx}px`);
+        sparkle.style.setProperty("--dy", `${dy}px`);
+
+        document.body.appendChild(sparkle);
+
+        setTimeout(() => {
+          sparkle.remove();
+        }, 500);
+      }
+    }
+
+    // Helper: Safely fetch parsed JSON from localStorage
     function getStorage(key) {
       try {
         const data = localStorage.getItem(key);
