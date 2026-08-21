@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hogwarts Spell & Task Scroll</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Fauna+One&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: #08080d;
+      color: #e0d8c3;
+      font-family: 'Fauna One', serif;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+      cursor: auto;
+    }
+
+    button, input, select, textarea, a {
+      cursor: pointer;
+    }
+
+    /* ================= AUTH / LOGIN PAGE ================= */
+    .auth-wrapper {
+      min-height: 100vh;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      background: 
+        linear-gradient(rgba(5, 5, 8, 0.8), rgba(5, 5, 8, 0.9)),
+        url("https://images.unsplash.com/photo-1547756536-cde3673fa2e5?q=80&w=1920&auto=format&fit=crop") no-repeat center center/cover;
+    }
+
+    .card {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 400px;
+      background-color: rgba(15, 12, 18, 0.95);
+      padding: 35px 30px;
+      border-radius: 12px;
+      border: 1px solid rgba(211, 166, 37, 0.4);
+      box-shadow: 0 0 20px rgba(211, 166, 37, 0.1);
+    }
+
+    .crest-container { 
+      text-align: center; 
+      margin-bottom: 20px; 
+    }
+
+    .hogwarts-crest { 
+      font-size: 32px; 
+      margin-bottom: 5px; 
+    }
+
+    h2, h3, h4 {
+      font-family: 'Cinzel', serif;
+      color: #d3a625;
+      letter-spacing: 1px;
+    }
+
+    .tabs {
+      display: flex;
+      margin-bottom: 25px;
+      border-bottom: 1px solid #2d2436;
+    }
+
+    .tabs button {
+      flex: 1;
+      padding: 10px;
+      background: none;
+      border: none;
+      color: #8c8299;
+      font-family: 'Cinzel', serif;
+      font-size: 13px;
+      font-weight: bold;
+      transition: color 0.2s ease, border-bottom 0.2s ease;
+    }
+
+    .tabs button.active {
+      color: #d3a625;
+      border-bottom: 2px solid #d3a625;
+    }
+
+    .field { 
+      margin-bottom: 18px; 
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 12px;
+      color: #c5b8a0;
+      font-family: 'Cinzel', serif;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 12px;
+      background-color: rgba(15, 12, 18, 0.9);
+      border: 1px solid #3d314a;
+      border-radius: 6px;
+      color: #f4e4bc;
+      font-family: 'Fauna One', serif;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: #d3a625;
+      box-shadow: 0 0 8px rgba(211, 166, 37, 0.25);
+    }
+
+    .main-btn {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #5c0001, #380000);
+      border: 1px solid #d3a625;
+      border-radius: 6px;
+      color: #f4e4bc;
+      font-family: 'Cinzel', serif;
+      font-weight: bold;
+      font-size: 13px;
+      letter-spacing: 0.5px;
+      transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .main-btn:hover {
+      background: linear-gradient(135deg, #740001, #4a0000);
+      transform: translateY(-1px);
+      box-shadow: 0 0 12px rgba(211, 166, 37, 0.3);
+    }
+
+    .error-msg {
+      color: #ff6b6b;
+      font-size: 13px;
+      margin-top: 12px;
+      text-align: center;
+      min-height: 18px;
+    }
+
+    .success-msg {
+      color: #4cd137;
+      font-size: 13px;
+      margin-top: 12px;
+      text-align: center;
+      min-height: 18px;
+    }
+
+    .hide { 
+      display: none !important; 
+    }
+
+    .fade-in { 
+      animation: fadeIn 0.3s ease-in-out; 
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ================= TASKS DASHBOARD ================= */
+    #app-box {
+      min-height: 100vh;
+      position: relative;
+      background: radial-gradient(circle at 50% 20%, #120f1a 0%, #050508 85%);
+    }
+
+    .candle-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .candle {
+      position: absolute;
+      width: 4px;
+      height: 18px;
+      background: #fdf3c6;
+      border-radius: 2px;
+      box-shadow: 0 0 6px #ffd700, 0 0 12px #ff8c00;
+      animation: floatCandle 6s ease-in-out infinite alternate;
+      opacity: 0.75;
+    }
+
+    .candle::before {
+      content: "";
+      position: absolute;
+      top: -5px;
+      left: 0px;
+      width: 4px;
+      height: 5px;
+      background: #ffaa00;
+      border-radius: 50%;
+      box-shadow: 0 0 4px #ff4500;
+      animation: flicker 0.2s infinite alternate;
+    }
+
+    @keyframes floatCandle {
+      0% { transform: translateY(0px); }
+      100% { transform: translateY(-15px); }
+    }
+
+    @keyframes flicker {
+      0% { opacity: 0.7; transform: scale(0.9); }
+      100% { opacity: 1; transform: scale(1.1); }
+    }
+
+    header {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 40px;
+      background: rgba(13, 10, 18, 0.85);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(211, 166, 37, 0.4);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'Cinzel', serif;
+    }
+
+    .status-dot {
+      font-size: 11px;
+      color: #d3a625;
+      font-family: 'Fauna One', serif;
+    }
+
+    .circle {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, #740001, #d3a625);
+      color: #f4e4bc;
+      border: 1px solid #d3a625;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .house-selector {
+      display: flex;
+      gap: 8px;
+      background: rgba(5, 5, 8, 0.6);
+      padding: 4px 8px;
+      border-radius: 20px;
+      border: 1px solid rgba(211, 166, 37, 0.2);
+    }
+
+    .house-btn {
+      background: none;
+      border: none;
+      font-size: 16px;
+      padding: 4px 6px;
+      border-radius: 50%;
+      transition: transform 0.2s ease;
+    }
+
+    .house-btn:hover, .house-btn.active {
+      transform: scale(1.15);
+      filter: drop-shadow(0 0 5px #d3a625);
+    }
+
+    .logout-btn {
+      background-color: transparent;
+      color: #c5b8a0;
+      border: 1px solid rgba(116, 0, 1, 0.6);
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .logout-btn:hover {
+      background-color: #740001;
+      color: #f4e4bc;
+      box-shadow: 0 0 10px rgba(116, 0, 1, 0.5);
+    }
+
+    .dashboard-main {
+      position: relative;
+      z-index: 2;
+      max-width: 720px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    .task-card-wrapper {
+      background: rgba(19, 15, 24, 0.88);
+      backdrop-filter: blur(10px);
+      padding: 24px;
+      border-radius: 12px;
+      border: 1px solid rgba(211, 166, 37, 0.3);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+      margin-bottom: 30px;
+    }
+
+    .card-header-title h3 {
+      margin-bottom: 16px;
+      font-size: 17px;
+    }
+
+    #task-form input, #task-form textarea, #task-form select {
+      margin-bottom: 12px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .glow-btn {
+      margin-top: 4px;
+    }
+
+    .list-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      padding: 0 4px;
+    }
+
+    .badge {
+      background-color: #1a1422;
+      color: #d3a625;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-family: 'Cinzel', serif;
+      border: 1px solid rgba(211, 166, 37, 0.4);
+    }
+
+    .filter-group {
+      display: flex;
+      gap: 6px;
+    }
+
+    .filter-btn {
+      background: #140f1a;
+      border: 1px solid #3d314a;
+      color: #c5b8a0;
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+    }
+
+    .filter-btn.active, .filter-btn:hover {
+      border-color: #d3a625;
+      color: #d3a625;
+      background: #231b2e;
+    }
+
+    #task-list { 
+      list-style: none; 
+    }
+
+    .task-item {
+      background: linear-gradient(135deg, rgba(23, 19, 27, 0.95), rgba(15, 12, 18, 0.95));
+      padding: 18px;
+      border-radius: 8px;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border: 1px solid rgba(211, 166, 37, 0.15);
+      border-left: 4px solid #d3a625;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .task-item:hover {
+      transform: translateY(-2px);
+      border-color: rgba(211, 166, 37, 0.4);
+      box-shadow: 0 6px 18px rgba(211, 166, 37, 0.1);
+    }
+
+    .task-tag {
+      display: inline-block;
+      font-size: 10px;
+      font-family: 'Cinzel', serif;
+      background: rgba(211, 166, 37, 0.12);
+      color: #d3a625;
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px solid rgba(211, 166, 37, 0.25);
+      margin-bottom: 6px;
+    }
+
+    .task-item h4 {
+      margin-bottom: 6px;
+      font-size: 15px;
+    }
+
+    .task-item p {
+      font-size: 13px;
+      color: #c5b8a0;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    .reminder {
+      display: inline-block;
+      font-size: 11px;
+      color: #d3a625;
+      background-color: #08060a;
+      padding: 3px 8px;
+      border-radius: 4px;
+      border: 1px solid rgba(211, 166, 37, 0.2);
+    }
+
+    .action-btns {
+      display: flex;
+      gap: 8px;
+    }
+
+    .action-btns button {
+      padding: 5px 10px;
+      border: none;
+      border-radius: 4px;
+      font-size: 11px;
+      font-family: 'Cinzel', serif;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .edit-btn {
+      background-color: #231b2e;
+      color: #e0d8c3;
+      border: 1px solid #3d314a !important;
+    }
+
+    .edit-btn:hover {
+      background-color: #3d314a;
+      color: #d3a625;
+    }
+
+    .del-btn {
+      background-color: rgba(116, 0, 1, 0.2);
+      color: #ff6b6b;
+      border: 1px solid rgba(116, 0, 1, 0.4) !important;
+    }
+
+    .del-btn:hover {
+      background-color: #740001;
+      color: #f4e4bc;
+    }
+
+    .empty-msg {
+      text-align: center;
+      padding: 30px;
+      color: #8c8299;
+      font-style: italic;
+      background-color: rgba(19, 15, 24, 0.8);
+      border-radius: 8px;
+      border: 1px dashed #3d314a;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Auth Screen Wrapper -->
+  <div id="auth-box" class="auth-wrapper fade-in">
+    <div class="card">
+      <div class="crest-container">
+        <div class="hogwarts-crest">🏰</div>
+        <h2>Hogwarts Portal</h2>
+      </div>
+
+      <div class="tabs">
+        <button id="login-tab" class="active" onclick="showLogin()">Alohomora (Login)</button>
+        <button id="register-tab" onclick="showRegister()">Enroll (Register)</button>
+      </div>
+
+      <!-- Login Form -->
+      <form id="login-form" onsubmit="loginUser(event)">
+        <div class="field">
+          <label for="login-username">Wizard / Witch Name</label>
+          <input type="text" id="login-username" required placeholder="e.g. HarryPotter" autocomplete="username">
+        </div>
+        <div class="field">
+          <label for="login-password">Passcode</label>
+          <input type="password" id="login-password" required placeholder="Enter password" autocomplete="current-password">
+        </div>
+        <button type="submit" class="main-btn">Cast Alohomora ✨</button>
+        <p id="login-msg" class="error-msg"></p>
+      </form>
+
+      <!-- Register Form -->
+      <form id="register-form" class="hide" onsubmit="registerUser(event)">
+        <div class="field">
+          <label for="reg-username">Chosen Wizard Name</label>
+          <input type="text" id="reg-username" required placeholder="Choose a wizard name" autocomplete="username">
+        </div>
+        <div class="field">
+          <label for="reg-password">Secret Passcode</label>
+          <input type="password" id="reg-password" required placeholder="Choose a passcode" autocomplete="new-password">
+        </div>
+        <button type="submit" class="main-btn">Sign the Parchment 📜</button>
+        <p id="reg-msg" class="error-msg"></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Main Task Screen -->
+  <div id="app-box" class="hide fade-in">
+    <div id="floating-candles" class="candle-container"></div>
+
+    <header>
+      <div class="user-info">
+        <div id="user-icon" class="circle">⚡</div>
+        <div>
+          <span id="user-name">Wizard</span>
+          <div class="status-dot">✨ Sorting Hat Approved</div>
+        </div>
+      </div>
+
+      <div class="house-selector">
+        <button type="button" class="house-btn active" onclick="setHouse(event, 'gryffindor')" title="Gryffindor">🦁</button>
+        <button type="button" class="house-btn" onclick="setHouse(event, 'slytherin')" title="Slytherin">🐍</button>
+        <button type="button" class="house-btn" onclick="setHouse(event, 'ravenclaw')" title="Ravenclaw">🦅</button>
+        <button type="button" class="house-btn" onclick="setHouse(event, 'hufflepuff')" title="Hufflepuff">🦡</button>
+      </div>
+
+      <button type="button" class="logout-btn" onclick="logout()">Mischief Managed 🪄</button>
+    </header>
+
+    <main class="dashboard-main">
+      <section class="task-card-wrapper">
+        <div class="card-header-title">
+          <h3>📜 Cast a New Task</h3>
+        </div>
+        <form id="task-form" onsubmit="saveTask(event)">
+          <input type="hidden" id="task-id">
+          <input type="text" id="task-title" placeholder="Spell / Task name (e.g. Brew Polyjuice Potion)" required>
+          <textarea id="task-desc" placeholder="Scroll details, ingredients, or notes..." rows="2"></textarea>
+          
+          <div class="form-row">
+            <select id="task-category">
+              <option value="Potions">🧪 Potions</option>
+              <option value="Charms">✨ Charms</option>
+              <option value="Defense">🛡️ Defense</option>
+              <option value="Herbology">🌿 Herbology</option>
+            </select>
+            <input type="datetime-local" id="task-time">
+          </div>
+
+          <button type="submit" id="add-btn" class="main-btn glow-btn">⚡ Accio Task</button>
+        </form>
+      </section>
+
+      <div class="list-header">
+        <div>
+          <h3>My Magical Scroll</h3>
+          <span id="task-count" class="badge">0 Spells</span>
+        </div>
+
+        <div class="filter-group">
+          <button type="button" class="filter-btn active" onclick="filterTasks(event, 'all')">All</button>
+          <button type="button" class="filter-btn" onclick="filterTasks(event, 'Potions')">🧪</button>
+          <button type="button" class="filter-btn" onclick="filterTasks(event, 'Charms')">✨</button>
+          <button type="button" class="filter-btn" onclick="filterTasks(event, 'Defense')">🛡️</button>
+          <button type="button" class="filter-btn" onclick="filterTasks(event, 'Herbology')">🌿</button>
+        </div>
+      </div>
+
+      <ul id="task-list"></ul>
+    </main>
+  </div>
+
+  <script>
+    let currentUser = "";
+    let currentFilter = "all";
+
+    // Helper: Safely fetch parsed JSON from localStorage without throwing errors
+    function getStorage(key) {
+      try {
+        const data = localStorage.getItem(key);
+        return data ? JSON.parse(data) : null;
+      } catch (err) {
+        console.error("Storage error:", err);
+        return null;
+      }
+    }
+
+    // Helper: Safely save JSON to localStorage
+    function setStorage(key, value) {
+      try {
+        localStorage.setItem(key, JSON.stringify(value));
+      } catch (err) {
+        console.error("Save error:", err);
+      }
+    }
+
+    // Clear Messages
+    function clearMessages() {
+      const loginMsg = document.getElementById("login-msg");
+      const regMsg = document.getElementById("reg-msg");
+      if (loginMsg) { loginMsg.innerText = ""; loginMsg.className = "error-msg"; }
+      if (regMsg) { regMsg.innerText = ""; regMsg.className = "error-msg"; }
+    }
+
+    // Show Login Tab
+    function showLogin() {
+      clearMessages();
+      document.getElementById("login-form").classList.remove("hide");
+      document.getElementById("register-form").classList.add("hide");
+      document.getElementById("login-tab").className = "active";
+      document.getElementById("register-tab").className = "";
+    }
+
+    // Show Register Tab
+    function showRegister() {
+      clearMessages();
+      document.getElementById("register-form").classList.remove("hide");
+      document.getElementById("login-form").classList.add("hide");
+      document.getElementById("register-tab").className = "active";
+      document.getElementById("login-tab").className = "";
+    }
+
+    // User Registration
+    function registerUser(event) {
+      if (event) event.preventDefault();
+      clearMessages();
+
+      const user = document.getElementById("reg-username").value.trim();
+      const pass = document.getElementById("reg-password").value.trim();
+      const regMsg = document.getElementById("reg-msg");
+
+      if (!user || !pass) {
+        regMsg.innerText = "Please fill in all details!";
+        return;
+      }
+
+      let users = getStorage("all_wizards") || {};
+      const userKey = user.toLowerCase();
+      
+      if (users[userKey]) {
+        regMsg.innerText = "Wizard already registered in Hogwarts records!";
+        return;
+      }
+
+      users[userKey] = { displayName: user, password: pass };
+      setStorage("all_wizards", users);
+
+      regMsg.className = "success-msg";
+      regMsg.innerText = "Registration Successful! Switching to Alohomora...";
+
+      setTimeout(() => {
+        document.getElementById("register-form").reset();
+        showLogin();
+        document.getElementById("login-username").value = user;
+      }, 1200);
+    }
+
+    // User Login
+    function loginUser(event) {
+      if (event) event.preventDefault();
+      clearMessages();
+
+      const userInput = document.getElementById("login-username").value.trim();
+      const passInput = document.getElementById("login-password").value.trim();
+      const loginMsg = document.getElementById("login-msg");
+
+      if (!userInput || !passInput) {
+        loginMsg.innerText = "Please enter both wizard name and passcode.";
+        return;
+      }
+
+      let users = getStorage("all_wizards") || {};
+      const userKey = userInput.toLowerCase();
+      const userData = users[userKey];
+
+      let storedPass = "";
+      let displayName = userInput;
+
+      if (typeof userData === "string") {
+        storedPass = userData;
+      } else if (userData && typeof userData === "object") {
+        storedPass = userData.password;
+        displayName = userData.displayName || userInput;
+      }
+
+      if (!userData || storedPass !== passInput) {
+        loginMsg.innerText = "Incantation failed! Wrong wizard name or passcode.";
+        return;
+      }
+
+      currentUser = userKey;
+      
+      document.getElementById("auth-box").classList.add("hide");
+      document.getElementById("app-box").classList.remove("hide");
+
+      document.getElementById("user-name").innerText = displayName;
+      document.getElementById("user-icon").innerText = displayName.charAt(0).toUpperCase();
+
+      generateFloatingCandles();
+      loadTasks();
+    }
+
+    // Logout
+    function logout() {
+      currentUser = "";
+      document.getElementById("app-box").classList.add("hide");
+      document.getElementById("auth-box").classList.remove("hide");
+      document.getElementById("login-form").reset();
+      document.getElementById("register-form").reset();
+      resetForm();
+      clearMessages();
+    }
+
+    // Background Floating Candles Effect
+    function generateFloatingCandles() {
+      const container = document.getElementById("floating-candles");
+      if (!container) return;
+      container.innerHTML = "";
+      
+      for (let i = 0; i < 18; i++) {
+        const candle = document.createElement("div");
+        candle.className = "candle";
+        candle.style.left = Math.random() * 95 + "%";
+        candle.style.top = Math.random() * 80 + "%";
+        candle.style.animationDelay = (Math.random() * 4) + "s";
+        candle.style.animationDuration = (4 + Math.random() * 4) + "s";
+        container.appendChild(candle);
+      }
+    }
+
+    // House Crest Switcher
+    function setHouse(event, house) {
+      const buttons = document.querySelectorAll('.house-btn');
+      buttons.forEach(btn => btn.classList.remove('active'));
+      if (event && event.currentTarget) {
+        event.currentTarget.classList.add('active');
+      }
+
+      const circle = document.getElementById("user-icon");
+      if (!circle) return;
+
+      if (house === 'gryffindor') circle.style.background = 'linear-gradient(135deg, #740001, #d3a625)';
+      if (house === 'slytherin') circle.style.background = 'linear-gradient(135deg, #1a472a, #2a623d)';
+      if (house === 'ravenclaw') circle.style.background = 'linear-gradient(135deg, #0e1a40, #946b2d)';
+      if (house === 'hufflepuff') circle.style.background = 'linear-gradient(135deg, #ecb939, #726255)';
+    }
+
+    // Category Filter
+    function filterTasks(event, category) {
+      currentFilter = category;
+      const buttons = document.querySelectorAll('.filter-btn');
+      buttons.forEach(btn => btn.classList.remove('active'));
+      if (event && event.currentTarget) {
+        event.currentTarget.classList.add('active');
+      }
+      loadTasks();
+    }
+
+    // Load & Render Tasks
+    function loadTasks() {
+      const list = document.getElementById("task-list");
+      const taskCount = document.getElementById("task-count");
+      if (!list) return;
+
+      list.innerHTML = "";
+
+      const tasks = getStorage("spells_" + currentUser) || [];
+
+      const filteredTasks = tasks.filter(t => currentFilter === "all" || t.category === currentFilter);
+      if (taskCount) {
+        taskCount.innerText = filteredTasks.length + (filteredTasks.length === 1 ? " Spell" : " Spells");
+      }
+
+      if (filteredTasks.length === 0) {
+        list.innerHTML = `<li class="empty-msg">Your scroll is empty for this category. Cast a new spell above! 🪄</li>`;
+        return;
+      }
+
+      tasks.forEach((item, index) => {
+        if (currentFilter !== "all" && item.category !== currentFilter) return;
+
+        const li = document.createElement("li");
+        li.className = "task-item";
+
+        const timeText = item.time ? "⏳ " + item.time.replace("T", " ") : "";
+        const categoryTag = item.category ? `<span class="task-tag">${item.category}</span>` : "";
+
+        li.innerHTML = `
+          <div>
+            ${categoryTag}
+            <h4>${escapeHTML(item.title)}</h4>
+            ${item.desc ? `<p>${escapeHTML(item.desc)}</p>` : ""}
+            ${timeText ? `<span class="reminder">${timeText}</span>` : ""}
+          </div>
+          <div class="action-btns">
+            <button type="button" class="edit-btn" onclick="editTask(${index})">Transfigure</button>
+            <button type="button" class="del-btn" onclick="deleteTask(${index})">Evanesco</button>
+          </div>
+        `;
+
+        list.appendChild(li);
+      });
+    }
+
+    // Save or Update Task
+    function saveTask(event) {
+      if (event) event.preventDefault();
+
+      const id = document.getElementById("task-id").value;
+      const title = document.getElementById("task-title").value.trim();
+      const desc = document.getElementById("task-desc").value.trim();
+      const category = document.getElementById("task-category").value;
+      const time = document.getElementById("task-time").value;
+
+      if (!title) return;
+
+      let tasks = getStorage("spells_" + currentUser) || [];
+
+      if (id === "") {
+        tasks.push({ title, desc, category, time });
+      } else {
+        tasks[parseInt(id, 10)] = { title, desc, category, time };
+      }
+
+      setStorage("spells_" + currentUser, tasks);
+      resetForm();
+      loadTasks();
+    }
+
+    // Edit Task
+    function editTask(index) {
+      const tasks = getStorage("spells_" + currentUser) || [];
+      const item = tasks[index];
+
+      if (!item) return;
+
+      document.getElementById("task-id").value = index;
+      document.getElementById("task-title").value = item.title || "";
+      document.getElementById("task-desc").value = item.desc || "";
+      document.getElementById("task-category").value = item.category || "Potions";
+      document.getElementById("task-time").value = item.time || "";
+
+      document.getElementById("add-btn").innerText = "✨ Update Spell";
+    }
+
+    // Delete Task
+    function deleteTask(index) {
+      let tasks = getStorage("spells_" + currentUser) || [];
+      tasks.splice(index, 1);
+      setStorage("spells_" + currentUser, tasks);
+      loadTasks();
+    }
+
+    // Reset Form State
+    function resetForm() {
+      const form = document.getElementById("task-form");
+      if (form) form.reset();
+      document.getElementById("task-id").value = "";
+      document.getElementById("add-btn").innerText = "⚡ Accio Task";
+    }
+
+    // Security Helper to prevent HTML Injection
+    function escapeHTML(str) {
+      if (!str) return "";
+      return str.replace(/[&<>'"]/g, 
+        tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+      );
+    }
+  </script>
+</body>
+</html>
